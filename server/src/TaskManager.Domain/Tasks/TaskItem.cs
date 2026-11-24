@@ -1,3 +1,5 @@
+using TaskManager.Domain.Tasks.Exceptions;
+
 namespace TaskManager.Domain.Tasks;
 
 public sealed class TaskItem
@@ -63,23 +65,30 @@ public sealed class TaskItem
             nowUtc);
     }
 
-    public void Update(
-        string title,
-        string? description,
-        TaskPriority priority,
-        DateOnly? dueDate,
-        DateTimeOffset nowUtc)
+    
+public void Update(
+    string title,
+    string? description,
+    TaskPriority priority,
+    DateOnly? dueDate,
+    DateTimeOffset nowUtc)
+{
+    if (IsCompleted)
     {
-        ValidateTitle(title);
-        ValidatePriority(priority);
-        ValidateUtc(nowUtc);
-
-        Title = title.Trim();
-        Description = NormalizeDescription(description);
-        Priority = priority;
-        DueDate = dueDate;
-        UpdatedAtUtc = nowUtc;
+        throw new CompletedTaskCannotBeEditedException(Id);
     }
+
+    ValidateTitle(title);
+    ValidatePriority(priority);
+    ValidateUtc(nowUtc);
+
+    Title = title.Trim();
+    Description = NormalizeDescription(description);
+    Priority = priority;
+    DueDate = dueDate;
+    UpdatedAtUtc = nowUtc;
+}
+
 
     public void MarkCompleted(DateTimeOffset nowUtc)
     {
